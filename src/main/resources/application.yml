@@ -1,0 +1,17 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres?schema=anime
+    username: root
+    password: root
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG
+
+#Hide stacktrace from exception throws to UI. for show error in UI use {url}?trace=true
+#server:
+#  error:
+#    include-stacktrace: on_param
