@@ -48,12 +48,8 @@ public class AnimeControllerIT {
         BDDMockito.when(animeRepositoryMock.findAll())
                 .thenReturn(Flux.just(anime));
 
-//        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
-//                .thenReturn(Mono.just(anime));
-//
-//        BDDMockito.when(animeServiceMock.save(AnimeCreator.createAnimeToBeSaved()))
-//                .thenReturn(Mono.just(anime));
-//
+        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.just(anime));
 //        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
 //                .thenReturn(Mono.empty());
 //
@@ -108,4 +104,35 @@ public class AnimeControllerIT {
                 .hasSize(1)
                 .contains(anime);
     }
+
+    @Test
+    @DisplayName("findById returns Mono with anime when it exists")
+    public void findById_ReturnMonoAnime_WhenSuccessful(){
+        testClient
+                .get()
+                .uri("/animes/{id}", 1)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Anime.class)
+                .isEqualTo(anime);
+
+    }
+
+    @Test
+    @DisplayName("findById returns Mono error when anime does not exists")
+    public void findById_ReturnMonoError_WhenEmptyMonoIsReturned(){
+
+        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.empty());
+        testClient
+                .get()
+                .uri("/animes/{id}", 1)
+                .exchange()
+                .expectStatus().isNotFound()//oris4xxClientError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(404)
+                .jsonPath("$.developerMessage").isEqualTo("A ResponseStatusException Happened");
+
+    }
+
 }
