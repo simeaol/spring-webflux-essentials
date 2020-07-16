@@ -28,7 +28,7 @@ public class AnimeController {
     }
 
     @GetMapping(path = "{id}")
-    public Mono<Anime> listAll(@PathVariable int id){
+    public Mono<Anime> findById(@PathVariable int id){
         log.info("Requesting anime for id={}",id);
         return animeService.findById(id);
 
