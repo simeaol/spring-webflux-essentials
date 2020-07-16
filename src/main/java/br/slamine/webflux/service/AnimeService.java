@@ -42,5 +42,9 @@ public class AnimeService {
                 .flatMap(animeRepository::save)
                 .then();//or you can just return then()
     }
+
+    public Mono<?> delete(int id) {
+        return findById(id)
+                .flatMap(animeRepository::delete);
     }
 }
