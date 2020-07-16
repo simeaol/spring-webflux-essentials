@@ -21,6 +21,7 @@ public class AnimeController {
     private final AnimeService animeService;
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public Flux<Anime> listAll(){
         log.info("Requesting all animes");
         return animeService.findAll();
