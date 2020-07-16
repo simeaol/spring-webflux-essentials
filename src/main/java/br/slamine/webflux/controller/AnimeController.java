@@ -5,13 +5,12 @@ import br.slamine.webflux.service.AnimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -40,6 +39,12 @@ public class AnimeController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Anime> save(@Valid @RequestBody Anime anime){
         return animeService.save(anime);
+    }
+
+    @PostMapping(path = "batch", consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Flux<Anime> saveBatch(@RequestBody List<Anime> animes){
+        return animeService.saveAll(animes);
     }
 
     @PutMapping(path = "{id}")
