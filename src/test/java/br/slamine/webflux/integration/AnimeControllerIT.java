@@ -1,29 +1,36 @@
 package br.slamine.webflux.integration;
 
 import br.slamine.webflux.domain.Anime;
+import br.slamine.webflux.exception.CustomAttributes;
 import br.slamine.webflux.repository.AnimeRepository;
 import br.slamine.webflux.service.AnimeService;
 import br.slamine.webflux.util.AnimeCreator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.BlockingOperationError;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
 
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith(SpringExtension.class)//Used for JUnit-5
 @WebFluxTest//Init the content related to webflux but doesn't scan all package
-@Import(AnimeService.class)
+@Import({AnimeService.class, CustomAttributes.class})
 public class AnimeControllerIT {
     /**
      * Integration Test shouldn't use mock. It need to be executed in real scenario (e.g: real database)
@@ -50,6 +57,10 @@ public class AnimeControllerIT {
 
         BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.just(anime));
+
+        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
+                .thenReturn(Mono.just(anime));
+
 //        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
 //                .thenReturn(Mono.empty());
 //
@@ -133,6 +144,38 @@ public class AnimeControllerIT {
                 .jsonPath("$.status").isEqualTo(404)
                 .jsonPath("$.developerMessage").isEqualTo("A ResponseStatusException Happened");
 
+    }
+
+    @Test
+    @DisplayName("save creates an anime when successful")
+    public void save_CreateAnime_WhenSuccessful(){
+        Anime animeTobeSaved = AnimeCreator.createAnimeToBeSaved();
+
+        testClient
+                .post()
+                .uri("/animes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(animeTobeSaved))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Anime.class)
+                .isEqualTo(anime);
+    }
+
+    @Test
+    @DisplayName("save returns Mono error with bad request when name is empty")
+    public void save_ReturnMonoError_WhenNameIsEmpty(){
+        Anime animeTobeSaved = AnimeCreator.createAnimeToBeSaved().withName("");
+
+        testClient
+                .post()
+                .uri("/animes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(animeTobeSaved))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400);
     }
 
 }
