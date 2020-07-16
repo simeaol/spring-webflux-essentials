@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @ExtendWith(SpringExtension.class)
 public class AnimeServiceTest {
 
-    @InjectMocks
+    @InjectMocks//Inject mock is used for target class (with is the class to be tested)
     private AnimeService animeService;
 
     @Mock
@@ -82,7 +82,7 @@ public class AnimeServiceTest {
 
     @Test
     @DisplayName("find by id returns mono with anime when it exist")
-    public void findAll_ReturnMonoOfAnime_WhenSuccessful(){
+    public void findById_ReturnMonoOfAnime_WhenSuccessful(){
 
         StepVerifier.create(animeService.findById(1))
                 .expectSubscription()
@@ -92,7 +92,7 @@ public class AnimeServiceTest {
 
     @Test
     @DisplayName("find by id returns mono error when does not exist")
-    public void findAll_ReturnMonoError_WhenEmptyMonoReturned(){
+    public void findById_ReturnMonoError_WhenEmptyMonoReturned(){
         BDDMockito.when(animeRepository.findById(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.empty());
 
