@@ -5,13 +5,13 @@ import br.slamine.webflux.service.AnimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,5 +32,17 @@ public class AnimeController {
         log.info("Requesting anime for id={}",id);
         return animeService.findById(id);
 
+    }
+
+    @PostMapping(consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Anime> save(@Valid @RequestBody Anime anime){
+        return animeService.save(anime);
+    }
+
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<?> update(@Valid @RequestBody Anime anime){
+        return animeService.update(anime);
     }
 }
